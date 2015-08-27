@@ -1,0 +1,26 @@
+{
+  "name": "ng2-skeleton",
+  "version": "1.0.0",
+  "description": "Basic project to start with angular2 alpha35, traceur & systemjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ericmartinezr/ng2-skeleton.git"
+  },
+  "author": "Eric Martinez",
+  "bugs": {
+    "url": "https://github.com/ericmartinezr/ng2-skeleton/issues"
+  },
+  "homepage": "https://github.com/ericmartinezr/ng2-skeleton#readme",
+  "dependencies": {
+    "angular2": "^2.0.0-alpha.35",
+    "es6-promise": "^3.0.2",
+    "rx": "^3.1.1",
+    "rx-lite": "^3.1.1",
+    "systemjs": "^0.18.17",
+    "traceur": "0.0.91"
+  }
+}

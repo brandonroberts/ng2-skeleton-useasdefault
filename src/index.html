@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+	<head>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta charset="UTF-8">
+
+	</head>
+
+	<body>
+		
+		<app>
+		</app>
+
+
+		<script src="node_modules/traceur/bin/traceur-runtime.js"></script>
+		<script src="node_modules/systemjs/dist/system.js"></script>
+
+		<!-- alpha35 -->
+		<script src="node_modules/angular2/bundles/angular2.dev.js"></script>
+		<script src="node_modules/angular2/bundles/http.dev.js"></script>
+		<script src="node_modules/angular2/bundles/router.dev.js"></script>
+
+		<script>
+			System.config({
+				traceurOptions: {
+					annotations: true,
+				    types: true,
+				    memberVariables: true
+				  },
+				  paths: {
+				    'angular2/*' : 'node_modules/angular2/*'
+				  },
+				  defaultJSExtensions: true
+			});
+			System.import("app").catch(console.log.bind(console));
+		</script>
+
+	</body>
+
+
+</html>
