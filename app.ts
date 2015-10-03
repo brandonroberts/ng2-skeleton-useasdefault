@@ -1,8 +1,8 @@
 /// <reference path="typings/angular2/angular2.d.ts" />
 
-import {Component, View, bootstrap} from 'angular2/angular2';
+import {Component, View, bootstrap, bind} from 'angular2/angular2';
 import {Http, HTTP_BINDINGS} from 'angular2/http';
-import {ROUTER_BINDINGS} from 'angular2/router';
+import {ROUTER_BINDINGS, ROUTER_PRIMARY_COMPONENT} from 'angular2/router';
 
 @Component({
 	selector : 'app'
@@ -17,4 +17,8 @@ class App {
 	}
 }
 
-bootstrap(App, [HTTP_BINDINGS, ROUTER_BINDINGS]);
+bootstrap(App, [
+	HTTP_BINDINGS,
+	ROUTER_BINDINGS,
+	bind(ROUTER_PRIMARY_COMPONENT).toValue(App)
+]);

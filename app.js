@@ -27,4 +27,8 @@ var App = (function () {
     ], App);
     return App;
 })();
-angular2_1.bootstrap(App, [http_1.HTTP_BINDINGS, router_1.ROUTER_BINDINGS]);
+angular2_1.bootstrap(App, [
+    http_1.HTTP_BINDINGS,
+    router_1.ROUTER_BINDINGS,
+    angular2_1.bind(router_1.ROUTER_PRIMARY_COMPONENT).toValue(App)
+]);
