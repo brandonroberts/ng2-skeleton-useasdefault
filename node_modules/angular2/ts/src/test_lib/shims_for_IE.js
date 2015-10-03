@@ -3,7 +3,8 @@
 if (!Object.hasOwnProperty('name')) {
   Object.defineProperty(Function.prototype, 'name', {
     get: function() {
-      var name = this.toString().match(/^\s*function\s*(\S*)\s*\(/)[1];
+      var matches = this.toString().match(/^\s*function\s*(\S*)\s*\(/);
+      var name = matches && matches.length > 1 ? matches[1] : "";
       // For better performance only parse once, and then cache the
       // result through a new accessor for repeated access.
       Object.defineProperty(this, 'name', {value: name});
@@ -98,3 +99,38 @@ if (!window.console.log) window.console.log = function () { };
 if (!window.console.error) window.console.error = function () { };
 if (!window.console.warn) window.console.warn = function () { };
 if (!window.console.assert) window.console.assert = function () { };
+
+//RequestAnimationFrame (IE9, Android 4.1, 4.2, 4.3)
+/*! @author Paul Irish */
+/*! @source https://gist.github.com/paulirish/1579671 */
+// http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+// http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
+
+// requestAnimationFrame polyfill by Erik Möller. fixes from Paul Irish and Tino Zijdel
+
+// MIT license
+
+(function() {
+    var lastTime = 0;
+    var vendors = ['ms', 'moz', 'webkit', 'o'];
+    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+        window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] 
+                                   || window[vendors[x]+'CancelRequestAnimationFrame'];
+    }
+ 
+    if (!window.requestAnimationFrame)
+        window.requestAnimationFrame = function(callback, element) {
+            var currTime = new Date().getTime();
+            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+            var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+              timeToCall);
+            lastTime = currTime + timeToCall;
+            return id;
+        };
+ 
+    if (!window.cancelAnimationFrame)
+        window.cancelAnimationFrame = function(id) {
+            clearTimeout(id);
+        };
+}());
