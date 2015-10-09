@@ -117,7 +117,6 @@ class ListWrapper {
       new List.generate(size, (_) => null, growable: true);
 
   static bool contains(List m, k) => m.contains(k);
-  static List map(list, fn(item)) => list.map(fn).toList();
   static List filter(List list, bool fn(item)) => list.where(fn).toList();
   static int indexOf(List list, value, [int startIndex = 0]) =>
       list.indexOf(value, startIndex);
@@ -126,9 +125,6 @@ class ListWrapper {
   static find(List list, bool fn(item)) =>
       list.firstWhere(fn, orElse: () => null);
   static bool any(List list, bool fn(item)) => list.any(fn);
-  static void forEach(Iterable list, fn(item)) {
-    list.forEach(fn);
-  }
 
   static void forEachWithIndex(List list, fn(item, index)) {
     for (var i = 0; i < list.length; ++i) {
@@ -161,13 +157,11 @@ class ListWrapper {
     }
   }
 
-  static removeLast(List list) => list.removeLast();
   static bool remove(List list, item) => list.remove(item);
   static void clear(List l) {
     l.clear();
   }
 
-  static String join(List l, String s) => l.join(s);
   static bool isEmpty(Iterable list) => list.isEmpty;
   static void fill(List l, value, [int start = 0, int end]) {
     l.fillRange(_startOffset(l, start), _endOffset(l, end), value);

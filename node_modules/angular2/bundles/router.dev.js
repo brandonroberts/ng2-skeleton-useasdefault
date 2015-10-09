@@ -1,9 +1,19 @@
 "format register";
-System.register("angular2/src/router/instruction", ["angular2/src/core/facade/collection", "angular2/src/core/facade/lang"], true, function(require, exports, module) {
+System.register("angular2/src/router/instruction", ["angular2/src/core/facade/collection", "angular2/src/core/facade/exceptions", "angular2/src/core/facade/lang"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
+  var __extends = (this && this.__extends) || function(d, b) {
+    for (var p in b)
+      if (b.hasOwnProperty(p))
+        d[p] = b[p];
+    function __() {
+      this.constructor = d;
+    }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+  };
   var collection_1 = require("angular2/src/core/facade/collection");
+  var exceptions_1 = require("angular2/src/core/facade/exceptions");
   var lang_1 = require("angular2/src/core/facade/lang");
   var RouteParams = (function() {
     function RouteParams(params) {
@@ -59,46 +69,78 @@ System.register("angular2/src/router/instruction", ["angular2/src/core/facade/co
     return '';
   }
   var ComponentInstruction = (function() {
-    function ComponentInstruction(urlPath, urlParams, _recognizer, params) {
-      if (params === void 0) {
-        params = null;
-      }
-      this.urlPath = urlPath;
-      this.urlParams = urlParams;
-      this._recognizer = _recognizer;
-      this.params = params;
+    function ComponentInstruction() {
       this.reuse = false;
     }
     Object.defineProperty(ComponentInstruction.prototype, "componentType", {
+      get: function() {
+        return exceptions_1.unimplemented();
+      },
+      enumerable: true,
+      configurable: true
+    });
+    ;
+    Object.defineProperty(ComponentInstruction.prototype, "specificity", {
+      get: function() {
+        return exceptions_1.unimplemented();
+      },
+      enumerable: true,
+      configurable: true
+    });
+    ;
+    Object.defineProperty(ComponentInstruction.prototype, "terminal", {
+      get: function() {
+        return exceptions_1.unimplemented();
+      },
+      enumerable: true,
+      configurable: true
+    });
+    ;
+    return ComponentInstruction;
+  })();
+  exports.ComponentInstruction = ComponentInstruction;
+  var ComponentInstruction_ = (function(_super) {
+    __extends(ComponentInstruction_, _super);
+    function ComponentInstruction_(urlPath, urlParams, _recognizer, params) {
+      if (params === void 0) {
+        params = null;
+      }
+      _super.call(this);
+      this._recognizer = _recognizer;
+      this.urlPath = urlPath;
+      this.urlParams = urlParams;
+      this.params = params;
+    }
+    Object.defineProperty(ComponentInstruction_.prototype, "componentType", {
       get: function() {
         return this._recognizer.handler.componentType;
       },
       enumerable: true,
       configurable: true
     });
-    ComponentInstruction.prototype.resolveComponentType = function() {
+    ComponentInstruction_.prototype.resolveComponentType = function() {
       return this._recognizer.handler.resolveComponentType();
     };
-    Object.defineProperty(ComponentInstruction.prototype, "specificity", {
+    Object.defineProperty(ComponentInstruction_.prototype, "specificity", {
       get: function() {
         return this._recognizer.specificity;
       },
       enumerable: true,
       configurable: true
     });
-    Object.defineProperty(ComponentInstruction.prototype, "terminal", {
+    Object.defineProperty(ComponentInstruction_.prototype, "terminal", {
       get: function() {
         return this._recognizer.terminal;
       },
       enumerable: true,
       configurable: true
     });
-    ComponentInstruction.prototype.routeData = function() {
+    ComponentInstruction_.prototype.routeData = function() {
       return this._recognizer.handler.data;
     };
-    return ComponentInstruction;
-  })();
-  exports.ComponentInstruction = ComponentInstruction;
+    return ComponentInstruction_;
+  })(ComponentInstruction);
+  exports.ComponentInstruction_ = ComponentInstruction_;
   global.define = __define;
   return module.exports;
 });
@@ -792,7 +834,7 @@ System.register("angular2/src/router/location", ["angular2/src/router/location_s
       this._subject = new async_1.EventEmitter();
       var browserBaseHref = lang_1.isPresent(href) ? href : this.platformStrategy.getBaseHref();
       if (lang_2.isBlank(browserBaseHref)) {
-        throw new exceptions_1.BaseException("No base href set. Either provide a binding to \"appBaseHrefToken\" or add a base element.");
+        throw new exceptions_1.BaseException("No base href set. Either provide a binding for the APP_BASE_HREF token or add a base element to the document.");
       }
       this._baseHref = stripTrailingSlash(stripIndexHtml(browserBaseHref));
       this.platformStrategy.onPopState(function(_) {
@@ -894,8 +936,8 @@ System.register("angular2/src/router/path_recognizer", ["angular2/src/core/facad
       var _this = this;
       var unused = collection_1.StringMapWrapper.create();
       var keys = collection_1.StringMapWrapper.keys(this.keys);
-      collection_1.ListWrapper.forEach(keys, function(key) {
-        unused[key] = collection_1.StringMapWrapper.get(_this.map, key);
+      keys.forEach(function(key) {
+        return unused[key] = collection_1.StringMapWrapper.get(_this.map, key);
       });
       return unused;
     };
@@ -1113,7 +1155,7 @@ System.register("angular2/src/router/path_recognizer", ["angular2/src/core/facad
       if (this._cache.has(hashKey)) {
         return this._cache.get(hashKey);
       }
-      var instruction = new instruction_1.ComponentInstruction(urlPath, urlParams, _recognizer, params);
+      var instruction = new instruction_1.ComponentInstruction_(urlPath, urlParams, _recognizer, params);
       this._cache.set(hashKey, instruction);
       return instruction;
     };
@@ -1135,8 +1177,15 @@ System.register("angular2/src/router/route_config_nomalizer", ["angular2/src/rou
     if (config instanceof route_config_decorator_1.Route || config instanceof route_config_decorator_1.Redirect || config instanceof route_config_decorator_1.AsyncRoute || config instanceof route_config_decorator_1.AuxRoute) {
       return config;
     }
-    if ((!config.component) == (!config.redirectTo)) {
+    if ((+!!config.component) + (+!!config.redirectTo) + (+!!config.loader) != 1) {
       throw new exceptions_1.BaseException("Route config should contain exactly one \"component\", \"loader\", or \"redirectTo\" property.");
+    }
+    if (config.loader) {
+      return new route_config_decorator_1.AsyncRoute({
+        path: config.path,
+        loader: config.loader,
+        as: config.as
+      });
     }
     if (config.component) {
       if (typeof config.component == 'object') {
@@ -1485,7 +1534,8 @@ System.register("angular2/src/router/route_registry", ["angular2/src/router/rout
         for (var i = 0; i < annotations.length; i++) {
           var annotation = annotations[i];
           if (annotation instanceof route_config_impl_1.RouteConfig) {
-            collection_1.ListWrapper.forEach(annotation.configs, function(config) {
+            var routeCfgs = annotation.configs;
+            routeCfgs.forEach(function(config) {
               return _this.config(component, config);
             });
           }
@@ -1509,7 +1559,7 @@ System.register("angular2/src/router/route_registry", ["angular2/src/router/rout
         return _resolveToNull;
       }
       var possibleMatches = componentRecognizer.recognize(parsedUrl);
-      var matchPromises = collection_1.ListWrapper.map(possibleMatches, function(candidate) {
+      var matchPromises = possibleMatches.map(function(candidate) {
         return _this._completePrimaryRouteMatch(candidate);
       });
       return async_1.PromiseWrapper.all(matchPromises).then(mostSpecific);
@@ -1959,7 +2009,7 @@ System.register("angular2/src/router/router", ["angular2/src/core/facade/async",
         throw new exceptions_1.BaseException("Link \"" + collection_1.ListWrapper.toJSON(linkParams) + "\" must start with \"/\", \"./\", or \"../\"");
       }
       if (rest[rest.length - 1] == '') {
-        collection_1.ListWrapper.removeLast(rest);
+        rest.pop();
       }
       if (rest.length < 1) {
         var msg = "Link \"" + collection_1.ListWrapper.toJSON(linkParams) + "\" must include a route name.";
