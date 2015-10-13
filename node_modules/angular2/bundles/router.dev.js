@@ -47,10 +47,17 @@ System.register("angular2/src/router/instruction", ["angular2/src/core/facade/co
   })();
   exports.PrimaryInstruction = PrimaryInstruction;
   function stringifyInstruction(instruction) {
-    var params = instruction.component.urlParams.length > 0 ? ('?' + instruction.component.urlParams.join('&')) : '';
-    return instruction.component.urlPath + stringifyAux(instruction) + stringifyPrimary(instruction.child) + params;
+    return stringifyInstructionPath(instruction) + stringifyInstructionQuery(instruction);
   }
   exports.stringifyInstruction = stringifyInstruction;
+  function stringifyInstructionPath(instruction) {
+    return instruction.component.urlPath + stringifyAux(instruction) + stringifyPrimary(instruction.child);
+  }
+  exports.stringifyInstructionPath = stringifyInstructionPath;
+  function stringifyInstructionQuery(instruction) {
+    return instruction.component.urlParams.length > 0 ? ('?' + instruction.component.urlParams.join('&')) : '';
+  }
+  exports.stringifyInstructionQuery = stringifyInstructionQuery;
   function stringifyPrimary(instruction) {
     if (lang_1.isBlank(instruction)) {
       return '';
@@ -197,13 +204,13 @@ System.register("angular2/src/router/lifecycle_annotations_impl", ["angular2/src
   return module.exports;
 });
 
-System.register("angular2/src/router/route_data", ["angular2/src/core/di", "angular2/src/core/facade/lang"], true, function(require, exports, module) {
+System.register("angular2/src/router/route_data", ["angular2/angular2", "angular2/src/core/facade/lang"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
-  var di_1 = require("angular2/src/core/di");
+  var angular2_1 = require("angular2/angular2");
   var lang_1 = require("angular2/src/core/facade/lang");
-  exports.ROUTE_DATA = lang_1.CONST_EXPR(new di_1.OpaqueToken('routeData'));
+  exports.ROUTE_DATA = lang_1.CONST_EXPR(new angular2_1.OpaqueToken('routeData'));
   global.define = __define;
   return module.exports;
 });
@@ -234,6 +241,10 @@ System.register("angular2/src/router/location_strategy", [], true, function(requ
     return LocationStrategy;
   })();
   exports.LocationStrategy = LocationStrategy;
+  function normalizeQueryParams(params) {
+    return (params.length > 0 && params.substring(0, 1) != '?') ? ('?' + params) : params;
+  }
+  exports.normalizeQueryParams = normalizeQueryParams;
   global.define = __define;
   return module.exports;
 });
@@ -330,10 +341,10 @@ System.register("angular2/src/router/url_parser", ["angular2/src/core/facade/col
     return url;
   }
   exports.pathSegmentsToUrl = pathSegmentsToUrl;
-  var SEGMENT_RE = lang_1.RegExpWrapper.create('^[^\\/\\(\\)\\?;=&]+');
+  var SEGMENT_RE = lang_1.RegExpWrapper.create('^[^\\/\\(\\)\\?;=&#]+');
   function matchUrlSegment(str) {
     var match = lang_1.RegExpWrapper.firstMatch(SEGMENT_RE, str);
-    return lang_1.isPresent(match) ? match[0] : null;
+    return lang_1.isPresent(match) ? match[0] : '';
   }
   var UrlParser = (function() {
     function UrlParser() {}
@@ -637,7 +648,7 @@ System.register("angular2/src/router/route_config_decorator", ["angular2/src/rou
   return module.exports;
 });
 
-System.register("angular2/src/router/hash_location_strategy", ["angular2/src/core/dom/dom_adapter", "angular2/src/core/di", "angular2/src/router/location_strategy"], true, function(require, exports, module) {
+System.register("angular2/src/router/hash_location_strategy", ["angular2/src/core/dom/dom_adapter", "angular2/angular2", "angular2/src/router/location_strategy"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
@@ -673,7 +684,7 @@ System.register("angular2/src/router/hash_location_strategy", ["angular2/src/cor
       return Reflect.metadata(k, v);
   };
   var dom_adapter_1 = require("angular2/src/core/dom/dom_adapter");
-  var di_1 = require("angular2/src/core/di");
+  var angular2_1 = require("angular2/angular2");
   var location_strategy_1 = require("angular2/src/router/location_strategy");
   var HashLocationStrategy = (function(_super) {
     __extends(HashLocationStrategy, _super);
@@ -690,10 +701,16 @@ System.register("angular2/src/router/hash_location_strategy", ["angular2/src/cor
     };
     HashLocationStrategy.prototype.path = function() {
       var path = this._location.hash;
-      return path.length > 0 ? path.substring(1) : path;
+      return (path.length > 0 ? path.substring(1) : path) + location_strategy_1.normalizeQueryParams(this._location.search);
     };
-    HashLocationStrategy.prototype.pushState = function(state, title, url) {
-      this._history.pushState(state, title, '#' + url);
+    HashLocationStrategy.prototype.pushState = function(state, title, path, queryParams) {
+      var url = path + location_strategy_1.normalizeQueryParams(queryParams);
+      if (url.length == 0) {
+        url = this._location.pathname;
+      } else {
+        url = '#' + url;
+      }
+      this._history.pushState(state, title, url);
     };
     HashLocationStrategy.prototype.forward = function() {
       this._history.forward();
@@ -701,7 +718,7 @@ System.register("angular2/src/router/hash_location_strategy", ["angular2/src/cor
     HashLocationStrategy.prototype.back = function() {
       this._history.back();
     };
-    HashLocationStrategy = __decorate([di_1.Injectable(), __metadata('design:paramtypes', [])], HashLocationStrategy);
+    HashLocationStrategy = __decorate([angular2_1.Injectable(), __metadata('design:paramtypes', [])], HashLocationStrategy);
     return HashLocationStrategy;
   })(location_strategy_1.LocationStrategy);
   exports.HashLocationStrategy = HashLocationStrategy;
@@ -709,7 +726,7 @@ System.register("angular2/src/router/hash_location_strategy", ["angular2/src/cor
   return module.exports;
 });
 
-System.register("angular2/src/router/path_location_strategy", ["angular2/src/core/dom/dom_adapter", "angular2/src/core/di", "angular2/src/router/location_strategy"], true, function(require, exports, module) {
+System.register("angular2/src/router/path_location_strategy", ["angular2/src/core/dom/dom_adapter", "angular2/angular2", "angular2/src/router/location_strategy"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
@@ -745,7 +762,7 @@ System.register("angular2/src/router/path_location_strategy", ["angular2/src/cor
       return Reflect.metadata(k, v);
   };
   var dom_adapter_1 = require("angular2/src/core/dom/dom_adapter");
-  var di_1 = require("angular2/src/core/di");
+  var angular2_1 = require("angular2/angular2");
   var location_strategy_1 = require("angular2/src/router/location_strategy");
   var PathLocationStrategy = (function(_super) {
     __extends(PathLocationStrategy, _super);
@@ -762,10 +779,10 @@ System.register("angular2/src/router/path_location_strategy", ["angular2/src/cor
       return this._baseHref;
     };
     PathLocationStrategy.prototype.path = function() {
-      return this._location.pathname;
+      return this._location.pathname + location_strategy_1.normalizeQueryParams(this._location.search);
     };
-    PathLocationStrategy.prototype.pushState = function(state, title, url) {
-      this._history.pushState(state, title, url);
+    PathLocationStrategy.prototype.pushState = function(state, title, url, queryParams) {
+      this._history.pushState(state, title, (url + location_strategy_1.normalizeQueryParams(queryParams)));
     };
     PathLocationStrategy.prototype.forward = function() {
       this._history.forward();
@@ -773,7 +790,7 @@ System.register("angular2/src/router/path_location_strategy", ["angular2/src/cor
     PathLocationStrategy.prototype.back = function() {
       this._history.back();
     };
-    PathLocationStrategy = __decorate([di_1.Injectable(), __metadata('design:paramtypes', [])], PathLocationStrategy);
+    PathLocationStrategy = __decorate([angular2_1.Injectable(), __metadata('design:paramtypes', [])], PathLocationStrategy);
     return PathLocationStrategy;
   })(location_strategy_1.LocationStrategy);
   exports.PathLocationStrategy = PathLocationStrategy;
@@ -789,7 +806,7 @@ System.register("angular2/src/router/route_definition", [], true, function(requi
   return module.exports;
 });
 
-System.register("angular2/src/router/location", ["angular2/src/router/location_strategy", "angular2/src/core/facade/lang", "angular2/src/core/facade/async", "angular2/src/core/facade/lang", "angular2/src/core/facade/exceptions", "angular2/src/core/di"], true, function(require, exports, module) {
+System.register("angular2/src/router/location", ["angular2/src/router/location_strategy", "angular2/src/core/facade/lang", "angular2/src/core/facade/async", "angular2/src/core/facade/lang", "angular2/src/core/facade/exceptions", "angular2/angular2"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
@@ -825,8 +842,8 @@ System.register("angular2/src/router/location", ["angular2/src/router/location_s
   var async_1 = require("angular2/src/core/facade/async");
   var lang_2 = require("angular2/src/core/facade/lang");
   var exceptions_1 = require("angular2/src/core/facade/exceptions");
-  var di_1 = require("angular2/src/core/di");
-  exports.APP_BASE_HREF = lang_1.CONST_EXPR(new di_1.OpaqueToken('appBaseHref'));
+  var angular2_1 = require("angular2/angular2");
+  exports.APP_BASE_HREF = lang_1.CONST_EXPR(new angular2_1.OpaqueToken('appBaseHref'));
   var Location = (function() {
     function Location(platformStrategy, href) {
       var _this = this;
@@ -834,7 +851,7 @@ System.register("angular2/src/router/location", ["angular2/src/router/location_s
       this._subject = new async_1.EventEmitter();
       var browserBaseHref = lang_1.isPresent(href) ? href : this.platformStrategy.getBaseHref();
       if (lang_2.isBlank(browserBaseHref)) {
-        throw new exceptions_1.BaseException("No base href set. Either provide a binding for the APP_BASE_HREF token or add a base element to the document.");
+        throw new exceptions_1.BaseException("No base href set. Either provide a provider for the APP_BASE_HREF token or add a base element to the document.");
       }
       this._baseHref = stripTrailingSlash(stripIndexHtml(browserBaseHref));
       this.platformStrategy.onPopState(function(_) {
@@ -856,9 +873,12 @@ System.register("angular2/src/router/location", ["angular2/src/router/location_s
       }
       return stripTrailingSlash(_addBaseHref(this._baseHref, url));
     };
-    Location.prototype.go = function(url) {
-      var finalUrl = this.normalizeAbsolutely(url);
-      this.platformStrategy.pushState(null, '', finalUrl);
+    Location.prototype.go = function(path, query) {
+      if (query === void 0) {
+        query = '';
+      }
+      var absolutePath = this.normalizeAbsolutely(path);
+      this.platformStrategy.pushState(null, '', absolutePath, query);
     };
     Location.prototype.forward = function() {
       this.platformStrategy.forward();
@@ -875,7 +895,7 @@ System.register("angular2/src/router/location", ["angular2/src/router/location_s
       }
       async_1.ObservableWrapper.subscribe(this._subject, onNext, onThrow, onReturn);
     };
-    Location = __decorate([di_1.Injectable(), __param(1, di_1.Optional()), __param(1, di_1.Inject(exports.APP_BASE_HREF)), __metadata('design:paramtypes', [location_strategy_1.LocationStrategy, String])], Location);
+    Location = __decorate([angular2_1.Injectable(), __param(1, angular2_1.Optional()), __param(1, angular2_1.Inject(exports.APP_BASE_HREF)), __metadata('design:paramtypes', [location_strategy_1.LocationStrategy, String])], Location);
     return Location;
   })();
   exports.Location = Location;
@@ -1458,7 +1478,7 @@ System.register("angular2/src/router/route_recognizer", ["angular2/src/core/faca
   return module.exports;
 });
 
-System.register("angular2/src/router/route_registry", ["angular2/src/router/route_recognizer", "angular2/src/router/instruction", "angular2/src/core/facade/collection", "angular2/src/core/facade/async", "angular2/src/core/facade/lang", "angular2/src/core/facade/exceptions", "angular2/src/router/route_config_impl", "angular2/src/core/reflection/reflection", "angular2/src/core/di", "angular2/src/router/route_config_nomalizer", "angular2/src/router/url_parser"], true, function(require, exports, module) {
+System.register("angular2/src/router/route_registry", ["angular2/src/router/route_recognizer", "angular2/src/router/instruction", "angular2/src/core/facade/collection", "angular2/src/core/facade/async", "angular2/src/core/facade/lang", "angular2/src/core/facade/exceptions", "angular2/src/router/route_config_impl", "angular2/src/core/reflection/reflection", "angular2/angular2", "angular2/src/router/route_config_nomalizer", "angular2/src/router/url_parser"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
@@ -1492,7 +1512,7 @@ System.register("angular2/src/router/route_registry", ["angular2/src/router/rout
   var exceptions_1 = require("angular2/src/core/facade/exceptions");
   var route_config_impl_1 = require("angular2/src/router/route_config_impl");
   var reflection_1 = require("angular2/src/core/reflection/reflection");
-  var di_1 = require("angular2/src/core/di");
+  var angular2_1 = require("angular2/angular2");
   var route_config_nomalizer_1 = require("angular2/src/router/route_config_nomalizer");
   var url_parser_1 = require("angular2/src/router/url_parser");
   var _resolveToNull = async_1.PromiseWrapper.resolve(null);
@@ -1688,7 +1708,7 @@ System.register("angular2/src/router/route_registry", ["angular2/src/router/rout
       }
       return null;
     };
-    RouteRegistry = __decorate([di_1.Injectable(), __metadata('design:paramtypes', [])], RouteRegistry);
+    RouteRegistry = __decorate([angular2_1.Injectable(), __metadata('design:paramtypes', [])], RouteRegistry);
     return RouteRegistry;
   })();
   exports.RouteRegistry = RouteRegistry;
@@ -1943,7 +1963,7 @@ System.register("angular2/src/router/router", ["angular2/src/core/facade/async",
         }
       }
       var promises = [];
-      collection_1.MapWrapper.forEach(this._auxRouters, function(router, name) {
+      this._auxRouters.forEach(function(router, name) {
         promises.push(router.commit(instruction.auxInstruction[name]));
       });
       return next.then(function(_) {
@@ -2047,14 +2067,15 @@ System.register("angular2/src/router/router", ["angular2/src/core/facade/async",
       if (_skipLocationChange === void 0) {
         _skipLocationChange = false;
       }
-      var emitUrl = instruction_1.stringifyInstruction(instruction);
-      if (emitUrl.length > 0) {
-        emitUrl = '/' + emitUrl;
+      var emitPath = instruction_1.stringifyInstructionPath(instruction);
+      var emitQuery = instruction_1.stringifyInstructionQuery(instruction);
+      if (emitPath.length > 0) {
+        emitPath = '/' + emitPath;
       }
       var promise = _super.prototype.commit.call(this, instruction);
       if (!_skipLocationChange) {
         promise = promise.then(function(_) {
-          _this._location.go(emitUrl);
+          _this._location.go(emitPath, emitQuery);
         });
       }
       return promise;
@@ -2115,7 +2136,7 @@ System.register("angular2/src/router/router", ["angular2/src/core/facade/async",
   return module.exports;
 });
 
-System.register("angular2/src/router/router_outlet", ["angular2/src/core/facade/async", "angular2/src/core/facade/collection", "angular2/src/core/facade/lang", "angular2/src/core/facade/exceptions", "angular2/src/core/metadata", "angular2/src/core/linker", "angular2/src/core/di", "angular2/src/router/router", "angular2/src/router/instruction", "angular2/src/router/route_data", "angular2/src/router/lifecycle_annotations", "angular2/src/router/route_lifecycle_reflector"], true, function(require, exports, module) {
+System.register("angular2/src/router/router_outlet", ["angular2/src/core/facade/async", "angular2/src/core/facade/collection", "angular2/src/core/facade/lang", "angular2/src/core/facade/exceptions", "angular2/angular2", "angular2/src/router/router", "angular2/src/router/instruction", "angular2/src/router/route_data", "angular2/src/router/lifecycle_annotations", "angular2/src/router/route_lifecycle_reflector"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
@@ -2150,9 +2171,7 @@ System.register("angular2/src/router/router_outlet", ["angular2/src/core/facade/
   var collection_1 = require("angular2/src/core/facade/collection");
   var lang_1 = require("angular2/src/core/facade/lang");
   var exceptions_1 = require("angular2/src/core/facade/exceptions");
-  var metadata_1 = require("angular2/src/core/metadata");
-  var linker_1 = require("angular2/src/core/linker");
-  var di_1 = require("angular2/src/core/di");
+  var angular2_1 = require("angular2/angular2");
   var routerMod = require("angular2/src/router/router");
   var instruction_1 = require("angular2/src/router/instruction");
   var route_data_1 = require("angular2/src/router/route_data");
@@ -2180,8 +2199,8 @@ System.register("angular2/src/router/router_outlet", ["angular2/src/core/facade/
       this._currentInstruction = nextInstruction;
       var componentType = nextInstruction.componentType;
       var childRouter = this._parentRouter.childRouter(componentType);
-      var bindings = di_1.Injector.resolve([di_1.bind(route_data_1.ROUTE_DATA).toValue(nextInstruction.routeData()), di_1.bind(instruction_1.RouteParams).toValue(new instruction_1.RouteParams(nextInstruction.params)), di_1.bind(routerMod.Router).toValue(childRouter)]);
-      return this._loader.loadNextToLocation(componentType, this._elementRef, bindings).then(function(componentRef) {
+      var providers = angular2_1.Injector.resolve([angular2_1.provide(route_data_1.ROUTE_DATA, {useValue: nextInstruction.routeData()}), angular2_1.provide(instruction_1.RouteParams, {useValue: new instruction_1.RouteParams(nextInstruction.params)}), angular2_1.provide(routerMod.Router, {useValue: childRouter})]);
+      return this._loader.loadNextToLocation(componentType, this._elementRef, providers).then(function(componentRef) {
         _this._componentRef = componentRef;
         if (route_lifecycle_reflector_1.hasLifecycleHook(hookMod.onActivate, componentType)) {
           return _this._componentRef.instance.onActivate(nextInstruction, previousInstruction);
@@ -2229,7 +2248,7 @@ System.register("angular2/src/router/router_outlet", ["angular2/src/core/facade/
       }
       return async_1.PromiseWrapper.resolve(result);
     };
-    RouterOutlet = __decorate([metadata_1.Directive({selector: 'router-outlet'}), __param(3, metadata_1.Attribute('name')), __metadata('design:paramtypes', [linker_1.ElementRef, linker_1.DynamicComponentLoader, routerMod.Router, String])], RouterOutlet);
+    RouterOutlet = __decorate([angular2_1.Directive({selector: 'router-outlet'}), __param(3, angular2_1.Attribute('name')), __metadata('design:paramtypes', [angular2_1.ElementRef, angular2_1.DynamicComponentLoader, routerMod.Router, String])], RouterOutlet);
     return RouterOutlet;
   })();
   exports.RouterOutlet = RouterOutlet;
@@ -2237,7 +2256,7 @@ System.register("angular2/src/router/router_outlet", ["angular2/src/core/facade/
   return module.exports;
 });
 
-System.register("angular2/router", ["angular2/src/router/router", "angular2/src/router/router_outlet", "angular2/src/router/router_link", "angular2/src/router/instruction", "angular2/src/router/route_registry", "angular2/src/router/location_strategy", "angular2/src/router/hash_location_strategy", "angular2/src/router/path_location_strategy", "angular2/src/router/location", "angular2/src/router/route_config_decorator", "angular2/src/router/route_definition", "angular2/src/router/lifecycle_annotations", "angular2/src/router/instruction", "angular2/angular2", "angular2/src/router/route_data", "angular2/src/router/location_strategy", "angular2/src/router/path_location_strategy", "angular2/src/router/router", "angular2/src/router/router_outlet", "angular2/src/router/router_link", "angular2/src/router/route_registry", "angular2/src/router/location", "angular2/core", "angular2/src/core/facade/lang"], true, function(require, exports, module) {
+System.register("angular2/router", ["angular2/src/router/router", "angular2/src/router/router_outlet", "angular2/src/router/router_link", "angular2/src/router/instruction", "angular2/src/router/route_registry", "angular2/src/router/location_strategy", "angular2/src/router/hash_location_strategy", "angular2/src/router/path_location_strategy", "angular2/src/router/location", "angular2/src/router/route_config_decorator", "angular2/src/router/route_definition", "angular2/src/router/lifecycle_annotations", "angular2/src/router/instruction", "angular2/angular2", "angular2/src/router/route_data", "angular2/src/router/location_strategy", "angular2/src/router/path_location_strategy", "angular2/src/router/router", "angular2/src/router/router_outlet", "angular2/src/router/router_link", "angular2/src/router/route_registry", "angular2/src/router/location", "angular2/angular2", "angular2/src/core/facade/lang", "angular2/src/core/facade/exceptions"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
@@ -2283,21 +2302,28 @@ System.register("angular2/router", ["angular2/src/router/router", "angular2/src/
   var router_link_2 = require("angular2/src/router/router_link");
   var route_registry_2 = require("angular2/src/router/route_registry");
   var location_2 = require("angular2/src/router/location");
-  var core_1 = require("angular2/core");
+  var angular2_2 = require("angular2/angular2");
   var lang_1 = require("angular2/src/core/facade/lang");
-  exports.ROUTER_PRIMARY_COMPONENT = lang_1.CONST_EXPR(new core_1.OpaqueToken('RouterPrimaryComponent'));
+  var exceptions_1 = require("angular2/src/core/facade/exceptions");
+  exports.ROUTER_PRIMARY_COMPONENT = lang_1.CONST_EXPR(new angular2_2.OpaqueToken('RouterPrimaryComponent'));
   exports.ROUTER_DIRECTIVES = lang_1.CONST_EXPR([router_outlet_2.RouterOutlet, router_link_2.RouterLink]);
-  exports.ROUTER_BINDINGS = lang_1.CONST_EXPR([route_registry_2.RouteRegistry, lang_1.CONST_EXPR(new core_1.Binding(location_strategy_2.LocationStrategy, {toClass: path_location_strategy_2.PathLocationStrategy})), location_2.Location, lang_1.CONST_EXPR(new core_1.Binding(router_2.Router, {
-    toFactory: routerFactory,
+  exports.ROUTER_PROVIDERS = lang_1.CONST_EXPR([route_registry_2.RouteRegistry, lang_1.CONST_EXPR(new angular2_2.Provider(location_strategy_2.LocationStrategy, {useClass: path_location_strategy_2.PathLocationStrategy})), location_2.Location, lang_1.CONST_EXPR(new angular2_2.Provider(router_2.Router, {
+    useFactory: routerFactory,
     deps: lang_1.CONST_EXPR([route_registry_2.RouteRegistry, location_2.Location, exports.ROUTER_PRIMARY_COMPONENT])
+  })), lang_1.CONST_EXPR(new angular2_2.Provider(exports.ROUTER_PRIMARY_COMPONENT, {
+    useFactory: routerPrimaryComponentFactory,
+    deps: lang_1.CONST_EXPR([angular2_2.ApplicationRef])
   }))]);
+  exports.ROUTER_BINDINGS = exports.ROUTER_PROVIDERS;
   function routerFactory(registry, location, primaryComponent) {
     return new router_2.RootRouter(registry, location, primaryComponent);
   }
-  function routerBindings(primaryComponent) {
-    return [exports.ROUTER_BINDINGS, core_1.bind(exports.ROUTER_PRIMARY_COMPONENT).toValue(primaryComponent)];
+  function routerPrimaryComponentFactory(app) {
+    if (app.componentTypes.length == 0) {
+      throw new exceptions_1.BaseException("Bootstrap at least one component before injecting Router.");
+    }
+    return app.componentTypes[0];
   }
-  exports.routerBindings = routerBindings;
   global.define = __define;
   return module.exports;
 });
