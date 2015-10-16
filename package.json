@@ -16,7 +16,7 @@
   },
   "homepage": "https://github.com/ericmartinezr/ng2-skeleton#readme",
   "dependencies": {
-    "angular2": "^2.0.0-alpha.41",
+    "angular2": "^2.0.0-alpha.44",
     "es6-promise": "^3.0.2",
     "rx": "^3.1.1",
     "rx-lite": "^3.1.1",
