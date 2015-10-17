@@ -1,6 +1,6 @@
 import {Component, bootstrap, provide} from 'angular2/angular2';
 import {Http, HTTP_PROVIDERS} from 'angular2/http';
-import {ROUTER_PROVIDERS, ROUTER_PRIMARY_COMPONENT} from 'angular2/router';
+import {ROUTER_PROVIDERS, ROUTER_PRIMARY_COMPONENT, LocationStrategy, HashLocationStrategy} from 'angular2/router';
 
 @Component({
 	selector : 'app',
@@ -16,5 +16,6 @@ class App {
 bootstrap(App, [
 	HTTP_PROVIDERS,
 	ROUTER_PROVIDERS,
-	provide(ROUTER_PRIMARY_COMPONENT, {useValue:App})
+	provide(ROUTER_PRIMARY_COMPONENT, {useValue: App}),
+	provide(LocationStrategy, {useClass: HashLocationStrategy})
 ]);

@@ -27,5 +27,6 @@ var App = (function () {
 angular2_1.bootstrap(App, [
     http_1.HTTP_PROVIDERS,
     router_1.ROUTER_PROVIDERS,
-    angular2_1.provide(router_1.ROUTER_PRIMARY_COMPONENT, { useValue: App })
+    angular2_1.provide(router_1.ROUTER_PRIMARY_COMPONENT, { useValue: App }),
+    angular2_1.provide(router_1.LocationStrategy, { useClass: router_1.HashLocationStrategy })
 ]);
