@@ -1,4 +1,4 @@
-import {Component, bootstrap, bind} from 'angular2/angular2';
+import {Component, bootstrap, provide} from 'angular2/angular2';
 import {Http, HTTP_PROVIDERS} from 'angular2/http';
 import {ROUTER_PROVIDERS, ROUTER_PRIMARY_COMPONENT} from 'angular2/router';
 
@@ -16,5 +16,5 @@ class App {
 bootstrap(App, [
 	HTTP_PROVIDERS,
 	ROUTER_PROVIDERS,
-	bind(ROUTER_PRIMARY_COMPONENT).toValue(App)
+	provide(ROUTER_PRIMARY_COMPONENT, {useValue:App})
 ]);
