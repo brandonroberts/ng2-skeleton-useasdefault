@@ -2,10 +2,7 @@
 
 Dependencies (already in node_modules. See package.json)
 
-- angular2 (alpha40)
-- rx (required by angular2)
-- rx-lite (required by angular2)
-- es6-promise (required by angular2)
+- angular2 (alpha45)
 - systemjs
 
 Steps :
