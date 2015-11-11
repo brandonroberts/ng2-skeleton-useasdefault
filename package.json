@@ -16,7 +16,7 @@
   },
   "homepage": "https://github.com/ericmartinezr/ng2-skeleton#readme",
   "dependencies": {
-    "angular2": "^2.0.0-alpha.45",
+    "angular2": "^2.0.0-alpha.46",
     "systemjs": "^0.19.5"
   }
 }
